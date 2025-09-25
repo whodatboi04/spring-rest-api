@@ -3,8 +3,8 @@ package com.infinity.springrestapi.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
