@@ -4,11 +4,14 @@ import com.infinity.springrestapi.dtos.UserDto;
 import com.infinity.springrestapi.entities.User;
 import com.infinity.springrestapi.mappers.UserMapper;
 import com.infinity.springrestapi.repositories.UserRepository;
+import com.infinity.springrestapi.request.RegisterUserRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -20,7 +23,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @GetMapping
-    public Iterable<UserDto> getAllUsers(
+    public List<UserDto> getAllUsers(
         @RequestParam(required = false, defaultValue = "", name = "sort") String sort
     ) {
         if (!Set.of("name", "email").contains(sort))
@@ -33,12 +36,26 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long id){
+    public ResponseEntity<UserDto> getUser(@PathVariable Long id)
+    {
         var user = userRepository.findById(id).orElse(null);
         if (user == null){
             return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.ok(userMapper.toDto(user));
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDto> createUser(
+            @RequestBody RegisterUserRequest request,
+            UriComponentsBuilder uriBuilder
+    )
+    {
+        var user = userMapper.toEntity(request);
+        userRepository.save(user);
+
+        var uri = uriBuilder.path("/users/{id}").buildAndExpand(user.getId()).toUri();
+        return ResponseEntity.created(uri).body(userMapper.toDto(user));
     }
 }
