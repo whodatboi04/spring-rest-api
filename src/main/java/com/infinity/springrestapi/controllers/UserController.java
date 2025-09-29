@@ -5,6 +5,7 @@ import com.infinity.springrestapi.entities.User;
 import com.infinity.springrestapi.mappers.UserMapper;
 import com.infinity.springrestapi.repositories.UserRepository;
 import com.infinity.springrestapi.request.RegisterUserRequest;
+import com.infinity.springrestapi.request.UpdateUserRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -57,5 +58,22 @@ public class UserController {
 
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(user.getId()).toUri();
         return ResponseEntity.created(uri).body(userMapper.toDto(user));
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<UserDto> updateUser(
+            @PathVariable Long id,
+            @RequestBody UpdateUserRequest request
+    )
+    {
+        var user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        userMapper.update(request, user);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(userMapper.toDto(user));
     }
 }
