@@ -1,7 +1,6 @@
 package com.infinity.springrestapi.controllers;
 
 import com.infinity.springrestapi.dtos.UserDto;
-import com.infinity.springrestapi.entities.User;
 import com.infinity.springrestapi.mappers.UserMapper;
 import com.infinity.springrestapi.repositories.UserRepository;
 import com.infinity.springrestapi.request.RegisterUserRequest;
@@ -75,5 +74,19 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok(userMapper.toDto(user));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Long id
+    )
+    {
+        var user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        userRepository.delete(user);
+        return ResponseEntity.noContent().build();
     }
 }
