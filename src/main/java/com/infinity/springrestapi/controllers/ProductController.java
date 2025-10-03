@@ -1,17 +1,19 @@
 package com.infinity.springrestapi.controllers;
 
 import com.infinity.springrestapi.dtos.ProductDto;
+import com.infinity.springrestapi.dtos.StoreProductRequest;
+import com.infinity.springrestapi.dtos.UpdateProductRequest;
 import com.infinity.springrestapi.entities.Product;
 import com.infinity.springrestapi.mappers.ProductMapper;
+import com.infinity.springrestapi.repositories.CategoryRepository;
 import com.infinity.springrestapi.repositories.ProductRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.aop.framework.ProxyConfig;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.logging.Filter;
@@ -33,4 +35,47 @@ public class ProductController {
         return products.stream().map(productMapper::toDto).toList();
     }
 
+    @PostMapping
+    public ResponseEntity<ProductDto> createProduct(
+            @RequestBody StoreProductRequest request,
+            UriComponentsBuilder uriComponentsBuilder)
+    {
+
+        var product = productMapper.toEntity(request);
+        productRepository.save(product);
+
+        var uri = uriComponentsBuilder.path("/products").buildAndExpand(product.getId()).toUri();
+        return ResponseEntity.created(uri).body(productMapper.toDto(product));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductDto> updateProduct(
+        @PathVariable Long id,
+        @RequestBody UpdateProductRequest request
+    )
+    {
+        var product = productRepository.findById(id).orElse(null);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        productMapper.update(request, product);
+        productRepository.save(product);
+
+        return ResponseEntity.ok().body(productMapper.toDto(product));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable Long id
+    )
+    {
+        var product = productRepository.findById(id).orElse(null);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        productRepository.delete(product);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

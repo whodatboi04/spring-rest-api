@@ -1,12 +1,14 @@
 package com.infinity.springrestapi.controllers;
 
+import com.infinity.springrestapi.dtos.ChangePasswordRequest;
 import com.infinity.springrestapi.dtos.UserDto;
 import com.infinity.springrestapi.mappers.UserMapper;
 import com.infinity.springrestapi.repositories.UserRepository;
-import com.infinity.springrestapi.request.RegisterUserRequest;
-import com.infinity.springrestapi.request.UpdateUserRequest;
+import com.infinity.springrestapi.dtos.RegisterUserRequest;
+import com.infinity.springrestapi.dtos.UpdateUserRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -87,6 +89,30 @@ public class UserController {
         }
 
         userRepository.delete(user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/change-password")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable Long id,
+            @RequestBody ChangePasswordRequest request
+    )
+    {
+        var user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+
+        if (
+                ! user.getPassword().equals(request.getOldPassword())
+                || user.getPassword().equals(request.getNewPassword())
+        ) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        user.setPassword(request.getNewPassword());
+        userRepository.save(user);
         return ResponseEntity.noContent().build();
     }
 }

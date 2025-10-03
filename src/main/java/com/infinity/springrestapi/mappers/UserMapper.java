@@ -1,7 +1,7 @@
 package com.infinity.springrestapi.mappers;
 
-import com.infinity.springrestapi.request.RegisterUserRequest;
-import com.infinity.springrestapi.request.UpdateUserRequest;
+import com.infinity.springrestapi.dtos.RegisterUserRequest;
+import com.infinity.springrestapi.dtos.UpdateUserRequest;
 import org.mapstruct.Mapper;
 import com.infinity.springrestapi.dtos.UserDto;
 import com.infinity.springrestapi.entities.User;

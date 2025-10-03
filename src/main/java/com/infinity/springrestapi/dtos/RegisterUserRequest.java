@@ -1,4 +1,4 @@
-package com.infinity.springrestapi.request;
+package com.infinity.springrestapi.dtos;
 
 import lombok.Data;
 
