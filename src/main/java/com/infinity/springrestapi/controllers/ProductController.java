@@ -39,7 +39,7 @@ public class ProductController {
         var product = productMapper.toEntity(request);
         productRepository.save(product);
 
-        var uri = uriComponentsBuilder.path("/products").buildAndExpand(product.getId()).toUri();
+        var uri = uriComponentsBuilder.path("/products/{id}").buildAndExpand(product.getId()).toUri();
         return ResponseEntity.created(uri).body(productMapper.toDto(product));
     }
 
