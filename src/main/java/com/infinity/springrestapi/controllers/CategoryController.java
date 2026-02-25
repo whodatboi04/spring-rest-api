@@ -6,7 +6,10 @@ import com.infinity.springrestapi.dtos.response.CategoryDto;
 import com.infinity.springrestapi.mappers.CategoryMapper;
 import com.infinity.springrestapi.model.Category;
 import com.infinity.springrestapi.repositories.CategoryRepository;
+import com.infinity.springrestapi.services.CategoryService;
+import com.infinity.springrestapi.utils.security.ResponseUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +24,21 @@ import java.util.List;
 public class CategoryController {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final CategoryService categoryService;
 
+    //TODO: ERROR INFINITE LOOP OF DATA
     @GetMapping
-    public List<CategoryDto> getAllCategories()
-    {
-        return categoryRepository.findAll(Sort.by("name"))
-                .stream()
-                .map(categoryMapper::toDto)
-                .toList();
+    public ResponseEntity<ApiResponse<List<Category>>> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<Category> categoryPage = categoryService.getCategories(page, size);
+
+        return ResponseEntity.ok(ResponseUtil.paginatedSuccess("Category successfuly fetched", categoryPage));
+//        return categoryRepository.findAll(Sort.by("name"))
+//                .stream()
+//                .map(categoryMapper::toDto)
+//                .toList();
     }
 
     @PostMapping
@@ -52,13 +62,9 @@ public class CategoryController {
             return ResponseEntity.notFound().build();
         }
 
-        ApiResponse<CategoryDto> response = new ApiResponse<>(
-                "Success",
-                    "Successfully Fetched",
-                categoryMapper.toDto(category),
-                null
+        return ResponseEntity.ok(
+                ResponseUtil.success("Successfully fetched", categoryMapper.toDto(category), null)
         );
-        return ResponseEntity.ok(response);
     }
 
 }
