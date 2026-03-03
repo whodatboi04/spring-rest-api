@@ -1,12 +1,16 @@
 package com.infinity.springrestapi.controllers;
 
 import com.infinity.springrestapi.dtos.request.ChangePasswordRequest;
+import com.infinity.springrestapi.dtos.response.ApiResponse;
 import com.infinity.springrestapi.dtos.response.UserDto;
 import com.infinity.springrestapi.mappers.UserMapper;
 import com.infinity.springrestapi.repositories.UserRepository;
 import com.infinity.springrestapi.dtos.request.RegisterUserRequest;
 import com.infinity.springrestapi.dtos.request.UpdateUserRequest;
+import com.infinity.springrestapi.services.UserService;
+import com.infinity.springrestapi.utils.security.ResponseUtil;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +27,22 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserService userService;
 
     @GetMapping
-    public List<UserDto> getAllUsers(
+    public ResponseEntity<ApiResponse<List<UserDto>>> getAllUsers(
+            @RequestParam(required = false, defaultValue = "name", name = "sort") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<UserDto> userDtoPage = userService.getUsers(page, size);
+        return ResponseEntity.ok(ResponseUtil.paginatedSuccess(
+                "Users successfully fetched",
+                userDtoPage
+        ));
+    }
+
+   /* public List<UserDto> getAllUsers(
         @RequestParam(required = false, defaultValue = "name", name = "sort") String sort
     ) {
         if (!Set.of("name", "email").contains(sort))
@@ -35,7 +52,7 @@ public class UserController {
                 .stream()
                 .map(userMapper::toDto)
                 .toList();
-    }
+    }*/
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id)

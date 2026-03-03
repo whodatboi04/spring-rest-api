@@ -26,19 +26,13 @@ public class CategoryController {
     private final CategoryMapper categoryMapper;
     private final CategoryService categoryService;
 
-    //TODO: ERROR INFINITE LOOP OF DATA
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Category>>> getAllCategories(
+    public ResponseEntity<ApiResponse<List<CategoryDto>>> getAllCategories(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<Category> categoryPage = categoryService.getCategories(page, size);
-
+        Page<CategoryDto> categoryPage = categoryService.getCategories(page, size);
         return ResponseEntity.ok(ResponseUtil.paginatedSuccess("Category successfuly fetched", categoryPage));
-//        return categoryRepository.findAll(Sort.by("name"))
-//                .stream()
-//                .map(categoryMapper::toDto)
-//                .toList();
     }
 
     @PostMapping

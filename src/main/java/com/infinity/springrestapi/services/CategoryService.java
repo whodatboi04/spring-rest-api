@@ -1,5 +1,7 @@
 package com.infinity.springrestapi.services;
 
+import com.infinity.springrestapi.dtos.response.CategoryDto;
+import com.infinity.springrestapi.mappers.CategoryMapper;
 import com.infinity.springrestapi.model.Category;
 import com.infinity.springrestapi.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +15,13 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public Page<Category> getCategories(int page, int size) {
+    @Autowired
+    private CategoryMapper categoryMapper;
+
+    public Page<CategoryDto> getCategories(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return categoryRepository.findAll(pageable);
+        Page<Category> categoryPage = categoryRepository.findAll(pageable);
+
+        return categoryPage.map(categoryMapper::toDto);
     }
 }
